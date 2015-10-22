@@ -210,4 +210,6 @@ def get(project=None, epPath=None):
                     i += 1
                     unsetProgressBar()
                     unsetStatus()
+            else:
+                errors['TACTIC'] = 'No assets found in shots'
     return missing, extra, errors
