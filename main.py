@@ -6,7 +6,7 @@ Created on Oct 20, 2015
 import sip
 sip.setapi('QString', 2)
 import sys
-sys.path.insert(0, 'D:/My/Tasks/workSpace/utilities')
+sys.path.insert(0, 'R:/Pipe_Repo/User/Qurban/utilities')
 from PyQt4.QtGui import QApplication, QStyleFactory
 from src import ui
 
