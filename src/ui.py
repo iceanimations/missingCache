@@ -16,6 +16,7 @@ reload(mc)
 reload(cui)
 reload(qutil)
 from pprint import pprint
+import appUsageApp
 
 rootPath = qutil.dirname(__file__, 2)
 uiPath = osp.join(rootPath, 'ui')
@@ -35,6 +36,8 @@ class UI(Form3, Base3):
         self.browseButton.clicked.connect(self.setEpPath)
         self.closeButton.clicked.connect(self.close)
         self.projectBox.activated.connect(self.setProject)
+        
+        appUsageApp.updateDatabase('missingCache')
         
     def setStatus(self, status):
         self.statusLabel.setText(status)
