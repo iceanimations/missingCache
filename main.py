@@ -6,7 +6,8 @@ Created on Oct 20, 2015
 import sip
 sip.setapi('QString', 2)
 import sys
-sys.path.insert(0, 'R:/Pipe_Repo/Users/Qurban/utilities')
+sys.path.insert(0, 'R:/Python_Scripts/plugins/utilities')
+sys.path.append('R:/Pipe_Repo/Projects/TACTIC')
 from PyQt4.QtGui import QApplication, QStyleFactory
 from src import ui
 
