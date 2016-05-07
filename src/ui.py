@@ -9,16 +9,18 @@ except:
     from PyQt4 import uic
 from PyQt4.QtGui import QMessageBox, QFileDialog, QTreeWidgetItem, qApp
 import os.path as osp
-import qutil
+import iutil
 import cui
 import _missingCache as mc
 reload(mc)
 reload(cui)
-reload(qutil)
+reload(iutil)
 from pprint import pprint
 import appUsageApp
 
-rootPath = qutil.dirname(__file__, 2)
+print iutil
+
+rootPath = iutil.dirname(__file__, 2)
 uiPath = osp.join(rootPath, 'ui')
 
 Form3, Base3 = uic.loadUiType(osp.join(uiPath, 'main.ui'))
@@ -112,7 +114,7 @@ class UI(Form3, Base3):
                 self.treeWidget2.expandAll()
             if errors:
                 self.showMessage(msg='Some errors occurred while finding missing cache files',
-                                 details=qutil.dictionaryToDetails(errors),
+                                 details=iutil.dictionaryToDetails(errors),
                                  icon=QMessageBox.Critical)
         except Exception as ex:
             self.showMessage(msg=str(ex), icon=QMessageBox.Critical)
@@ -129,7 +131,7 @@ class UI(Form3, Base3):
         if er:
             self.showMessage(msg='Error occurred while connecting to TACTIC',
                              icon=QMessageBox.Critical,
-                             details=qutil.distionaryToDetails(er))
+                             details=iutil.dictionaryToDetails(er))
             return
         self.projectBox.addItems(projs)
         mc.setParent(self)
