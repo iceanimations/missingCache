@@ -16,7 +16,7 @@ reload(mc)
 reload(cui)
 reload(iutil)
 from pprint import pprint
-import appUsageApps
+import appUsageApp
 
 rootPath = iutil.dirname(__file__, 2)
 uiPath = osp.join(rootPath, 'ui')
