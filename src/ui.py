@@ -75,52 +75,52 @@ class UI(Form3, Base3):
     def find(self):
         self.treeWidget.clear()
         self.treeWidget2.clear()
-        try:
-            if not self.server:
-                self.showMessage(msg='Could not connect to TACTIC, please close and reopen the window',
-                                icon=QMessageBox.Warning)
-                return
-            if not self.getProject():
-                self.showMessage(msg='Select a project and then try to find missing cache files',
-                                icon=QMessageBox.Information)
-                return
-            if not self.server: return
-            epPath = self.getEpPath()
-            if not epPath: return
-            missing, extra, errors = mc.get(epPath=epPath)
-            if missing:
-                for seq, shots in missing.items():
-                    seqItem = QTreeWidgetItem(self.treeWidget)
-                    seqItem.setText(0, seq)
-                    for shot, assets in shots.items():
-                        shotItem = QTreeWidgetItem(seqItem)
-                        shotItem.setText(0, shot)
-                        for asset in assets:
-                            assetItem = QTreeWidgetItem(shotItem)
-                            assetItem.setText(0, asset)
-                self.treeWidget.expandAll()
-            if extra:
-                for seq, shots in extra.items():
-                    seqItem = QTreeWidgetItem(self.treeWidget2)
-                    seqItem.setText(0, seq)
-                    for shot, assets in shots.items():
-                        shotItem = QTreeWidgetItem(seqItem)
-                        shotItem.setText(0, shot)
-                        for asset in assets:
-                            assetItem = QTreeWidgetItem(shotItem)
-                            assetItem.setText(0, asset)
-                self.treeWidget2.expandAll()
-            if errors:
-                self.showMessage(msg='Some errors occurred while finding missing cache files',
-                                 details=iutil.dictionaryToDetails(errors),
-                                 icon=QMessageBox.Critical)
-        except Exception as ex:
-            self.showMessage(msg=str(ex), icon=QMessageBox.Critical)
-        finally:
-            self.progressBar.hide()
-            self.progressBar.setMaximum(0)
-            self.progressBar.setValue(0)
-            self.setStatus('')
+#         try:
+        if not self.server:
+            self.showMessage(msg='Could not connect to TACTIC, please close and reopen the window',
+                            icon=QMessageBox.Warning)
+            return
+        if not self.getProject():
+            self.showMessage(msg='Select a project and then try to find missing cache files',
+                            icon=QMessageBox.Information)
+            return
+        if not self.server: return
+        epPath = self.getEpPath()
+        if not epPath: return
+        missing, extra, errors = mc.get(epPath=epPath)
+        if missing:
+            for seq, shots in missing.items():
+                seqItem = QTreeWidgetItem(self.treeWidget)
+                seqItem.setText(0, seq)
+                for shot, assets in shots.items():
+                    shotItem = QTreeWidgetItem(seqItem)
+                    shotItem.setText(0, shot)
+                    for asset in assets:
+                        assetItem = QTreeWidgetItem(shotItem)
+                        assetItem.setText(0, asset)
+            self.treeWidget.expandAll()
+        if extra:
+            for seq, shots in extra.items():
+                seqItem = QTreeWidgetItem(self.treeWidget2)
+                seqItem.setText(0, seq)
+                for shot, assets in shots.items():
+                    shotItem = QTreeWidgetItem(seqItem)
+                    shotItem.setText(0, shot)
+                    for asset in assets:
+                        assetItem = QTreeWidgetItem(shotItem)
+                        assetItem.setText(0, asset)
+            self.treeWidget2.expandAll()
+        if errors:
+            self.showMessage(msg='Some errors occurred while finding missing cache files',
+                             details=iutil.dictionaryToDetails(errors),
+                             icon=QMessageBox.Critical)
+#         except Exception as ex:
+#             self.showMessage(msg=str(ex), icon=QMessageBox.Critical)
+#         finally:
+#             self.progressBar.hide()
+#             self.progressBar.setMaximum(0)
+#             self.progressBar.setValue(0)
+#             self.setStatus('')
     
     def login(self):
         self.server, er = mc.setServer()

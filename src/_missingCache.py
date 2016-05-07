@@ -182,7 +182,10 @@ def get(project=None, epPath=None):
                         del shotCaches[:]
                         cacheFiles.sort(key=len, reverse=True)
                         shotCode = '_'.join([epName, shotName])
-                        shotAssets = epAssets[seqCode][shotCode]
+                        try:
+                            shotAssets = epAssets[seqCode][shotCode]
+                        except KeyError:
+                            continue
                         shotAssets = [asset.lower() for asset in shotAssets]
                         shotAssets.sort(key=len, reverse=True)
                         cacheFiles = [cacheFile.lower() for cacheFile in cacheFiles]
