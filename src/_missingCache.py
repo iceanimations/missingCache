@@ -10,6 +10,7 @@ import tactic_client_lib as tcl
 
 server = None
 
+
 def getProjects():
     projects = []
     errors = {}
@@ -20,29 +21,40 @@ def getProjects():
             errors['Could not get the list of projects from TACTIC'] = str(ex)
     return projects, errors
 
+
 def setServer():
     global server
     error = {}
     try:
-        server = tcl.TacticServerStub(server='tacticvm', login='tactic', password='tactic123', project='test_mansour_ep')
+        server = tcl.TacticServerStub(
+            server='ice-tactic',
+            login='tactic',
+            password='tactic123',
+            project='test_mansour_ep')
     except Exception as ex:
         error['Could not connect to TACTIC'] = str(ex)
     return server, error
 
+
 def setProject(project):
     if server:
         server.set_project(project)
-        
+
+
 parent = None
+
+
 def setParent(par):
     global parent
     parent = par
-    
+
+
 def setStatus(status):
     if parent:
         parent.setStatus(status)
         parent.processEvents()
-        
+
+
 def setProgressBar(maxVal):
     if parent:
         parent.progressBar.show()
@@ -50,21 +62,25 @@ def setProgressBar(maxVal):
         parent.progressBar.setValue(0)
         parent.processEvents()
 
+
 def setProgressBarValue(val):
     if parent:
         parent.progressBar.setValue(val)
         parent.processEvents()
-        
+
+
 def unsetProgressBar():
     if parent:
         parent.progressBar.hide()
         parent.progressBar.setValue(0)
         parent.progressBar.setMaximum(0)
         parent.processEvents()
-        
+
+
 def unsetStatus():
     parent.statusLabel.setText('')
     parent.processEvents()
+
 
 def getShot(shot):
     caches = []
@@ -81,7 +97,7 @@ def getShot(shot):
     else:
         errors[cachePath] = 'Directory not found'
     return caches, errors
-    
+
 
 def getSeq(seq):
     errors = {}
@@ -93,55 +109,68 @@ def getSeq(seq):
             setProgressBar(len(shots))
             for i, shot in enumerate(shots):
                 shotPath = osp.join(shotsPath, shot)
-                if re.search('SH\d+', shot, re.IGNORECASE) and osp.isdir(shotPath):
+                if re.search('SH\d+[ABC]?', shot,
+                             re.IGNORECASE) and osp.isdir(shotPath):
                     caches[shot], er = getShot(shotPath)
                     errors.update(er)
-                setProgressBarValue(i+1)
+                setProgressBarValue(i + 1)
             unsetProgressBar()
         else:
             errors[seq] = 'No shot found'
     else:
         errors[shotsPath] = 'Directory not found'
     return caches, errors
-    
+
+
 def getCacheFromAsset(meshName, caches, mappedCaches):
-    newMeshName = meshName.replace('regular', '').replace('combined', '').replace('shaded', '')
+    newMeshName = meshName.replace('regular', '').replace('combined',
+                                                          '').replace(
+                                                              'shaded', '')
     newMeshName = newMeshName.split('_')
     newMeshName = [x.lower() for x in newMeshName]
     count = 0
     match = None
     for cache in caches:
-        newCount = len(set(newMeshName) & set([osp.splitext(x.lower())[0] for x in cache.split('_')]))
+        newCount = len(
+            set(newMeshName) & set(
+                [osp.splitext(x.lower())[0] for x in cache.split('_')]))
         if newCount > count and cache not in mappedCaches:
             match = cache
             count = newCount
     return match
 
+
 def getAssetsInEpisode(project, epName):
     errors = {}
     assets = {}
-    if not server: errors['Server Error'] = 'No TACTIC Server instance found'; return
-    if not project: project = server.get_project()
-    if not project: errors['Project Error'] = 'Could not find a Project to query data from'; return
-    #assetsInEp = server.eval("@SOBJECT(vfx/['episode_code', %s])"%epName.lower())
-    #sequences = server.eval("@SOBJECT(vfx/sequence['episode_code', %s])"%epName.lower())
-    shots = server.eval("@SOBJECT(vfx/sequence['episode_code', '%s'].vfx/shot)"%epName.lower())
-    assetInShot = server.eval("@SOBJECT(vfx/sequence['episode_code', '%s'].vfx/shot.vfx/asset_in_shot)"%epName.lower())
-    
-    #seqCodes = [seq['code'] for seq in sequences]
+    if not server:
+        errors['Server Error'] = 'No TACTIC Server instance found'
+        return
+    if not project:
+        project = server.get_project()
+    if not project:
+        errors['Project Error'] = 'Could not find a Project to query data from'
+        return
+    shots = server.eval("@SOBJECT(vfx/sequence['episode_code', '%s'].vfx/shot)"
+                        % epName)
+    assetInShot = server.eval(
+            "@SOBJECT(vfx/sequence['episode_code','%s']"
+            ".vfx/shot.vfx/asset_in_shot)" % epName)
+
     seqCodes = {shot['code']: shot['sequence_code'] for shot in shots}
-    
+
     for asset in assetInShot:
         shotCode = asset['shot_code']
         seqCode = seqCodes[shotCode]
-        if assets.has_key(seqCode):
-            if assets[seqCode].has_key(shotCode):
+        if seqCode in assets:
+            if shotCode in assets[seqCode]:
                 assets[seqCode][shotCode].append(asset['asset_code'])
             else:
                 assets[seqCode][shotCode] = [asset['asset_code']]
         else:
             assets[seqCode] = {shotCode: [asset['asset_code']]}
     return assets, errors
+
 
 def get(project=None, epPath=None):
     errors = {}
@@ -155,9 +184,10 @@ def get(project=None, epPath=None):
             if seqs:
                 seqLen = len(seqs)
                 for i, seq in enumerate(seqs):
-                    setStatus('Scanning %s (%s of %s)'%(seq, i+1, seqLen))
+                    setStatus('Scanning %s (%s of %s)' % (seq, i + 1, seqLen))
                     sp = osp.join(seqDir, seq)
-                    if re.search('SQ\d+', seq, re.IGNORECASE) and osp.isdir(sp):
+                    if re.search('SQ\d+', seq,
+                                 re.IGNORECASE) and osp.isdir(sp):
                         caches[seq], er = getSeq(sp)
                         errors.update(er)
             else:
@@ -174,7 +204,7 @@ def get(project=None, epPath=None):
                 seqLen = len(caches)
                 i = 1
                 for seqName, shots in caches.items():
-                    setStatus('Comparing %s (%s of %s)'%(seqName, i, seqLen))
+                    setStatus('Comparing %s (%s of %s)' % (seqName, i, seqLen))
                     seqCode = '_'.join([epName, seqName])
                     setProgressBar(len(shots))
                     j = 1
@@ -188,23 +218,28 @@ def get(project=None, epPath=None):
                             continue
                         shotAssets = [asset.lower() for asset in shotAssets]
                         shotAssets.sort(key=len, reverse=True)
-                        cacheFiles = [cacheFile.lower() for cacheFile in cacheFiles]
+                        cacheFiles = [
+                            cacheFile.lower() for cacheFile in cacheFiles
+                        ]
                         for asset in shotAssets:
-                            cache = getCacheFromAsset(asset, cacheFiles, shotCaches)
+                            cache = getCacheFromAsset(asset, cacheFiles,
+                                                      shotCaches)
                             if cache:
                                 shotCaches.append(cache)
                             else:
-                                if missing.has_key(seqName):
-                                    if missing[seqName].has_key(shotName):
-                                        missing[seqName][shotName].append(asset)
+                                if seqName in missing:
+                                    if shotName in missing[seqName]:
+                                        missing[seqName][shotName].append(
+                                            asset)
                                     else:
                                         missing[seqName][shotName] = [asset]
                                 else:
                                     missing[seqName] = {shotName: [asset]}
-                        temp = list(set(cacheFiles).difference(set(shotCaches)))
+                        temp = list(
+                            set(cacheFiles).difference(set(shotCaches)))
                         if temp:
-                            if extra.has_key(seqName):
-                                if not extra[seqName].has_key(shotName):
+                            if seqName in extra:
+                                if shotName not in extra[seqName]:
                                     extra[seqName][shotName] = temp
                             else:
                                 extra[seqName] = {shotName: temp}
